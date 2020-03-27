@@ -6,18 +6,21 @@ import (
 )
 
 func main() {
-	steps := make([]string, 3)
-	steps[0] = "🌐 Checking GitHub connectivity..."
+	steps := make(map[string]string)
+	steps["Github connectivity"] = "🌐 Checking"
+	steps["VPN connectivity"] = "🌐 Checking"
+	steps["AWS connectivity"] = "🌐 Checking"
+
 	spinner := spinner2.NewMultiStepSpinner("Checking ", " connectivity", 100*time.Millisecond, steps)
 	spinner.Start()
 	time.Sleep(time.Second * 3)
-	steps[1] = "🌐 Checking VPN connectivity..."
+	steps["VPN connectivity"] = "✅"
 	time.Sleep(time.Second * 3)
-	steps[2] = "🌐 Checking AWS connectivity..."
+	steps["Github connectivity"] = "✅"
 	time.Sleep(time.Second * 3)
 	//spinner.Update(steps)
 	time.Sleep(time.Second * 3)
-	steps[2] = "❌  Error checking AWS connectivity..."
+	steps["AWS connectivity"] = "❌: Cannot connect to AWS."
 	time.Sleep(time.Second * 3)
 	spinner.Stop()
 }

@@ -3,7 +3,8 @@ package spinner
 import (
 	"fmt"
 	"github.com/adriancarayol-eb/hud-doctor/internal/hud"
-	"strings"
+	tm "github.com/buger/goterm"
+	"sort"
 	"sync"
 	"time"
 )
@@ -16,10 +17,10 @@ type MultiStepSpinner struct {
 	Delay    time.Duration
 	Suffix   string
 	Prefix   string
-	Steps    []string
+	Steps    map[string]string
 }
 
-func NewMultiStepSpinner(prefix, suffix string, d time.Duration, steps []string) *MultiStepSpinner {
+func NewMultiStepSpinner(prefix, suffix string, d time.Duration, steps map[string]string) *MultiStepSpinner {
 	return &MultiStepSpinner{
 		mu:       &sync.RWMutex{},
 		renderer: hud.New(),
@@ -51,9 +52,17 @@ func (ms *MultiStepSpinner) Start() {
 				if !ms.active {
 					return
 				}
-				bodySteps := strings.Join(ms.Steps, "\n")
-				bodyPayload := fmt.Sprintf("%s ... %s\n%s", ms.Prefix, ms.Suffix, bodySteps)
-				ms.renderer.Refresh(hud.Payload{Body: bodyPayload, TimeStamp: time.Now()})
+				keys := make([]string, 0, len(ms.Steps))
+				for k := range ms.Steps {
+					keys = append(keys, k)
+				}
+				sort.Strings(keys)
+				totals := tm.NewTable(0, 10, 5, ' ', 0)
+				fmt.Fprintf(totals, "Task\tStatus\t\n")
+				for _, k := range keys {
+					fmt.Fprintf(totals, "%s\t%s\n", k, ms.Steps[k])
+				}
+				ms.renderer.Refresh(totals)
 				ms.mu.Unlock()
 				time.Sleep(ms.Delay)
 			}
@@ -69,7 +78,7 @@ func (ms *MultiStepSpinner) Stop() {
 	}
 }
 
-func (ms *MultiStepSpinner) Update(steps []string) {
+func (ms *MultiStepSpinner) Update(steps map[string]string) {
 	ms.mu.Lock()
 	ms.Steps = steps
 	ms.mu.Unlock()
