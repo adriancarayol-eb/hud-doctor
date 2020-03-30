@@ -15,20 +15,16 @@ type MultiStepSpinner struct {
 	active   bool
 	stopChan chan struct{}
 	Delay    time.Duration
-	Suffix   string
-	Prefix   string
 	Steps    map[string]string
 }
 
-func NewMultiStepSpinner(prefix, suffix string, d time.Duration) *MultiStepSpinner {
+func NewMultiStepSpinner(loadingMsg string, d time.Duration) *MultiStepSpinner {
 	return &MultiStepSpinner{
 		mu:       &sync.RWMutex{},
-		renderer: hud.New(),
+		renderer: hud.New(loadingMsg),
 		stopChan: make(chan struct{}, 1),
 		active:   false,
 		Delay:    d,
-		Suffix:   suffix,
-		Prefix:   prefix,
 		Steps:    make(map[string]string),
 	}
 }
