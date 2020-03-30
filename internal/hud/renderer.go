@@ -2,6 +2,7 @@ package hud
 
 import (
 	tm "github.com/buger/goterm"
+	"log"
 )
 
 // Renderer is a struct to render content in the hud.
@@ -18,7 +19,17 @@ func New() *Renderer {
 func (r *Renderer) Refresh(table *tm.Table) {
 	tm.Clear() // Clear current screen
 	tm.MoveCursor(1, 1)
-	tm.Println(tm.Bold("yak doctor"))
-	tm.Println(table)
+	_, err := tm.Println(tm.Bold("yak doctor"))
+
+	if err != nil {
+		log.Printf("Error: %v", err)
+	}
+
+	_, err = tm.Println(table)
+
+	if err != nil {
+		log.Printf("Error: %v", err)
+	}
+
 	tm.Flush()
 }

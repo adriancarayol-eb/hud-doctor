@@ -20,7 +20,7 @@ type MultiStepSpinner struct {
 	Steps    map[string]string
 }
 
-func NewMultiStepSpinner(prefix, suffix string, d time.Duration, steps map[string]string) *MultiStepSpinner {
+func NewMultiStepSpinner(prefix, suffix string, d time.Duration) *MultiStepSpinner {
 	return &MultiStepSpinner{
 		mu:       &sync.RWMutex{},
 		renderer: hud.New(),
@@ -29,7 +29,7 @@ func NewMultiStepSpinner(prefix, suffix string, d time.Duration, steps map[strin
 		Delay:    d,
 		Suffix:   suffix,
 		Prefix:   prefix,
-		Steps:    steps,
+		Steps:    make(map[string]string),
 	}
 }
 
@@ -75,11 +75,13 @@ func (ms *MultiStepSpinner) Stop() {
 	defer ms.mu.Unlock()
 	if ms.active {
 		ms.stopChan <- struct{}{}
+		ms.active = false
+		tm.Flush()
 	}
 }
 
-func (ms *MultiStepSpinner) Update(steps map[string]string) {
+func (ms *MultiStepSpinner) Update(task, status string) {
 	ms.mu.Lock()
-	ms.Steps = steps
 	ms.mu.Unlock()
+	ms.Steps[task] = status
 }
